@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Explore Designers</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --neon-green: #39FF14;
+    }
+  </style>
+</head>
+<body class="bg-black text-white py-10 px-4">
+  <div class="max-w-6xl mx-auto">
+    <h1 class="text-4xl font-extrabold text-center text-[var(--neon-green)] mb-8">Explore Designer Portfolios</h1>
+    <div id="portfolioList" class="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3"></div>
+  </div>
+
+  <script>
+    const portfolios = JSON.parse(localStorage.getItem("portfolios")) || [];
+    const container = document.getElementById("portfolioList");
+
+    portfolios.forEach(p => {
+      const card = document.createElement("div");
+      card.className = "bg-neutral-900 border border-[var(--neon-green)] rounded shadow hover:scale-105 transition cursor-pointer";
+      card.onclick = () => window.location.href = `profile.html?id=${p.id}`;
+      card.innerHTML = `
+        ${p.images[0] ? `<img src="${p.images[0]}" class="w-full h-48 object-cover rounded-t" />` : ''}
+        <div class="p-4">
+          <h2 class="text-xl font-semibold text-[var(--neon-green)]">${p.name}</h2>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  </script>
+</body>
+</html>

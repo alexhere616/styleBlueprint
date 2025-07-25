@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --neon-green: #39FF14;
+    }
+  </style>
+</head>
+<body class="bg-black text-white flex items-center justify-center h-screen">
+  <form action="portfolio.html" class="bg-neutral-900 p-8 rounded shadow-lg w-full max-w-sm">
+    <h1 class="text-3xl font-bold mb-6 text-center text-[var(--neon-green)]">Join StyledBlueprint</h1>
+    <input type="text" placeholder="Full Name" class="mb-4 w-full p-2 rounded bg-black border border-[var(--neon-green)] text-white placeholder-white" required />
+    <input type="email" placeholder="Email" class="mb-4 w-full p-2 rounded bg-black border border-[var(--neon-green)] text-white placeholder-white" required />
+    <input type="password" placeholder="Password" class="mb-6 w-full p-2 rounded bg-black border border-[var(--neon-green)] text-white placeholder-white" required />
+    <button type="submit" class="w-full bg-[var(--neon-green)] text-black font-bold py-2 rounded hover:brightness-110 transition">Continue</button>
+  </form>
+</body>
+</html>
