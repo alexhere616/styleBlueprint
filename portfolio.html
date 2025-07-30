@@ -27,34 +27,77 @@
       <button type="submit" class="w-full bg-[var(--neon-green)] text-black font-semibold py-2 rounded hover:brightness-110">Submit</button>
     </form>
   </div>
-  <script>
-    
-    document.getElementById("portfolioForm").addEventListener("submit", async function (e) {
-      e.preventDefault();
-      const name = document.getElementById("name").value;
-      const bio = document.getElementById("bio").value;
-      const pdfFile = document.getElementById("pdf").files[0];
-      const imageFiles = document.getElementById("images").files;
 
-      const reader = file => new Promise((resolve) => {
-        const r = new FileReader();
-        r.onload = () => resolve(r.result);
-        r.readAsDataURL(file);
-      });
+  <!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
-      const pdfBase64 = pdfFile ? await reader(pdfFile) : null;
-      const imageBase64s = [];
-      for (let i = 0; i < Math.min(imageFiles.length, 3); i++) {
-        imageBase64s.push(await reader(imageFiles[i]));
-      }
+<script>
+  // 🔑 Your Firebase configuration (replace with your actual config)
+  const firebaseConfig = {
+  apiKey: "AIzaSyBRPwnjLLMnObHi41IMa65joTELt1RCdf8",
+  authDomain: "styleblueprint-1ab4c.firebaseapp.com",
+  databaseURL: "https://styleblueprint-1ab4c-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "styleblueprint-1ab4c",
+  storageBucket: "styleblueprint-1ab4c.firebasestorage.app",
+  messagingSenderId: "63085658670",
+  appId: "1:63085658670:web:156d5007bbeb838931d5bf",
+  measurementId: "G-PDKDL8Y2G8"
+};
 
-      let portfolios = JSON.parse(localStorage.getItem("portfolios")) || [];
-      portfolios.push({ id: portfolios.length, name, bio, pdfBase64, images: imageBase64s });
-      localStorage.setItem("portfolios", JSON.stringify(portfolios));
+  // 🔌 Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-      window.location.href = "explore.html";
+  // 📥 Handle Form Submission
+  document.getElementById("portfolioForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value;
+    const bio = document.getElementById("bio").value;
+    const pdfFile = document.getElementById("pdf").files[0];
+    const imageFiles = document.getElementById("images").files;
+
+    // Convert files to base64
+    const reader = file => new Promise(resolve => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.readAsDataURL(file);
     });
-  </script>
+
+    const pdfBase64 = pdfFile ? await reader(pdfFile) : null;
+    const imageBase64s = [];
+    for (let i = 0; i < Math.min(imageFiles.length, 3); i++) {
+      imageBase64s.push(await reader(imageFiles[i]));
+    }
+
+    // 📦 Create portfolio object
+    const portfolioEntry = {
+      name,
+      bio,
+      pdf: pdfBase64,
+      images: imageBase64s,
+      timestamp: Date.now()
+    };
+
+    // 🔥 Save to Firebase
+    try {
+      await db.ref("portfolios").push(portfolioEntry);
+      console.log("✅ Portfolio uploaded to Firebase");
+    } catch (error) {
+      console.error("❌ Firebase upload failed:", error);
+    }
+
+    // 💾 Optional: Still save to localStorage (if needed)
+    let portfolios = JSON.parse(localStorage.getItem("portfolios")) || [];
+    portfolios.push({ ...portfolioEntry, id: portfolios.length });
+    localStorage.setItem("portfolios", JSON.stringify(portfolios));
+
+    //➡️ Redirect to Explore page
+    window.location.href = "explore.html";
+  });
+</script>
+
 </body>
 </html>
 
