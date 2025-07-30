@@ -17,78 +17,105 @@
     <div id="portfolioList" class="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3"></div>
   </div>
 
-  <script>
-const portfolios = JSON.parse(localStorage.getItem("portfolios")) || [];
-console.log('------', portfolios);
-const container = document.getElementById("portfolioList");
-// Define download function once
-function downloadPDF(base64Data, filename) {
-  if (!base64Data) {
-    alert("No PDF available to download.");
-    return;
+  <!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+<script>
+  // 🔑 Firebase config – replace with yours
+  const firebaseConfig = {
+  apiKey: "AIzaSyBRPwnjLLMnObHi41IMa65joTELt1RCdf8",
+  authDomain: "styleblueprint-1ab4c.firebaseapp.com",
+  databaseURL: "https://styleblueprint-1ab4c-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "styleblueprint-1ab4c",
+  storageBucket: "styleblueprint-1ab4c.firebasestorage.app",
+  messagingSenderId: "63085658670",
+  appId: "1:63085658670:web:156d5007bbeb838931d5bf",
+  measurementId: "G-PDKDL8Y2G8"
+};
+
+
+  // 🔌 Init Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  const container = document.getElementById("portfolioList");
+
+  // ✅ Function to download a Base64 PDF
+  function downloadPDF(base64Data, filename) {
+    if (!base64Data) {
+      alert("No PDF available to download.");
+      return;
+    }
+
+    const dataUrl = base64Data.startsWith("data:application/pdf;base64,")
+      ? base64Data
+      : `data:application/pdf;base64,${base64Data}`;
+
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
-  // Check if it's already a data URL
-  const dataUrl = base64Data.startsWith("data:application/pdf;base64,")
-    ? base64Data
-    : `data:application/pdf;base64,${base64Data}`;
+  // 🔁 Fetch portfolios from Firebase
+  db.ref("portfolios").once("value")
+    .then(snapshot => {
+      const data = snapshot.val();
+      const portfolios = data ? Object.entries(data).map(([id, p]) => ({ id, ...p })) : [];
 
-  const link = document.createElement('a');
-  link.href = dataUrl;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
+      portfolios.forEach((p, index) => {
+        const card = document.createElement('div');
+        card.className = "bg-neutral-900 border border-[var(--neon-green)] rounded shadow hover:scale-105 transition cursor-pointer w-64";
+        //card.onclick = () => window.location.href = `profile.html?id=${p.id}`;
 
-portfolios.forEach((p, index) => {
-  console.log('localStorage----p---', p);
+        let imageSection = '';
+        if (p.images && p.images.length > 0) {
+          imageSection = `
+            <img src="${p.images[0]}" 
+                 class="w-full h-48 object-cover rounded-t"
+                 style="cursor: pointer;"
+                 data-index="${index}"
+                 onclick="event.stopPropagation(); downloadPortfolioPDF('${p.id}');"
+            />
+          `;
+        } else {
+          imageSection = `
+            <div class="w-full h-48 bg-gray-800 flex items-center justify-center rounded-t text-gray-500 text-sm">
+              No Image
+            </div>
+          `;
+        }
 
-  const card = document.createElement('div');
-  card.className = "bg-neutral-900 border border-[var(--neon-green)] rounded shadow hover:scale-105 transition cursor-pointer w-64";
+        card.innerHTML = `
+          ${imageSection}
+          <div class="p-4">
+            <h2 class="text-xl font-semibold text-[var(--neon-green)]">${p.name}</h2>
+          </div>
+        `;
 
-  card.onclick = () => window.location.href = `profile.html?id=${p.id}`;
+        container.appendChild(card);
+      });
 
-  // Avoid attaching large Base64 string in HTML
-  let imageSection = '';
-  if (p.images && p.images.length > 0) {
-    imageSection = `
-      <img src="${p.images[0]}" 
-           class="w-full h-48 object-cover rounded-t"
-           style="cursor: pointer;"
-           data-index="${index}"
-           onclick="event.stopPropagation(); downloadPortfolioPDF(${index});"
-      />
-    `;
-  } else {
-    imageSection = `
-      <div class="w-full h-48 bg-gray-800 flex items-center justify-center rounded-t text-gray-500 text-sm">
-        No Image
-      </div>
-    `;
+      // 🔁 Store for PDF download mapping
+      window.firebasePortfolios = portfolios;
+    })
+    .catch(error => {
+      console.error("❌ Error fetching Firebase data:", error);
+    });
+
+  // 🌐 PDF download handler (by Firebase ID)
+  function downloadPortfolioPDF(id) {
+    const portfolio = window.firebasePortfolios.find(p => p.id === id);
+    if (portfolio && portfolio.pdf) {
+      const filename = `${portfolio.name || "portfolio"}.pdf`;
+      downloadPDF(portfolio.pdf, filename);
+    } else {
+      alert("No PDF found for this portfolio.");
+    }
   }
-
-  card.innerHTML = `
-    ${imageSection}
-    <div class="p-4">
-      <h2 class="text-xl font-semibold text-[var(--neon-green)]">${p.name}</h2>
-    </div>
-  `;
-
-  container.appendChild(card);
-});
-
-// Global function to call from onclick
-function downloadPortfolioPDF(index) {
-  const portfolios = JSON.parse(localStorage.getItem("portfolios")) || [];
-  const p = portfolios[index];
-  if (p && p.pdfBase64) {
-    const filename = `${p.name || "portfolio"}.pdf`;
-    downloadPDF(p.pdfBase64, filename);
-  } else {
-    alert("No PDF found for this portfolio.");
-  }
-}
 </script>
 
 </body>
