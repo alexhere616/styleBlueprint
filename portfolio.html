@@ -27,7 +27,7 @@
       <button type="submit" class="w-full bg-[var(--neon-green)] text-black font-semibold py-2 rounded hover:brightness-110">Submit</button>
     </form>
   </div>
-
+  localStorage.clear(portfolioList);
   <script>
     document.getElementById("portfolioForm").addEventListener("submit", async function (e) {
       e.preventDefault();
