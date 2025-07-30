@@ -21,7 +21,6 @@
 const portfolios = JSON.parse(localStorage.getItem("portfolios")) || [];
 console.log('------', portfolios);
 const container = document.getElementById("portfolioList");
-localStorage.clear(portfolioList);
 // Define download function once
 function downloadPDF(base64Data, filename) {
   if (!base64Data) {
